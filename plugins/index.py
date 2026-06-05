@@ -60,6 +60,7 @@ async def index_files(bot, query):
         )
 
     elif action.startswith('start_'):
+        await query.answer("🚀 Indexing Started!")
         target_db = action.replace('start_', '') # 'main' or 'brazzers'
         db_name = "Brazzers" if target_db == "brazzers" else "Main Video"
         
@@ -228,7 +229,10 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip, target_db):
                         
                         # If it's a document, ensure it's a video type
                         if message.media == enums.MessageMediaType.DOCUMENT:
-                            if not media.mime_type or not media.mime_type.startswith("video/"):
+                            if not media.mime_type or not (
+                                media.mime_type.startswith("video/") or
+                                media.mime_type.startswith("image/gif")
+                            ):
                                 unsupported += 1
                                 continue
 
@@ -249,7 +253,8 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip, target_db):
                             duplicate += 1
 
                     except Exception as e:
-                        print(f"Error: {e}")
+                        import logging
+                        logging.error(f"Indexing Item Error: {e}")
                         errors += 1
 
                 # Update Progress

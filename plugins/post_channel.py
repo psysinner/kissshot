@@ -7,10 +7,13 @@ from utils import temp, get_shortlink, generate_weird_name, generate_thumbnail
 # -----------------------
 # BRAZZERS INDEX
 # -----------------------
-@Client.on_message((filters.video | filters.document) & filters.chat(BRAZZER_CHANNEL))
+@Client.on_message((filters.video | filters.document | filters.animation) & filters.chat(BRAZZER_CHANNEL))
 async def index_brazzers_videos(_, m: Message):
-    media = m.video or m.document
-    if m.document and not m.document.mime_type.startswith("video/"):
+    media = m.video or m.document or m.animation
+    if m.document and not (
+        m.document.mime_type.startswith("video/") or
+        m.document.mime_type.startswith("image/gif")
+    ):
         return
     file_id = media.file_id
     file_unique_id = media.file_unique_id
@@ -19,11 +22,14 @@ async def index_brazzers_videos(_, m: Message):
 # -----------------------
 # NORMAL VIDEO INDEX
 # -----------------------
-@Client.on_message((filters.video | filters.document) & filters.chat(VIDEO_CHANNEL))
+@Client.on_message((filters.video | filters.document | filters.animation) & filters.chat(VIDEO_CHANNEL))
 async def index_normal_videos(client, m: Message):
     try:
-        media = m.video or m.document
-        if m.document and not m.document.mime_type.startswith("video/"):
+        media = m.video or m.document or m.animation
+        if m.document and not (
+            m.document.mime_type.startswith("video/") or
+            m.document.mime_type.startswith("image/gif")
+        ):
             return
 
         file_id = media.file_id
@@ -77,7 +83,7 @@ async def index_normal_videos(client, m: Message):
 
         try:
             # 1️⃣ Telegram thumbnail → download → send as photo
-            if media.thumbs:
+            if hasattr(media, "thumbs") and media.thumbs:
                 thumb_file = await client.download_media(
                     media.thumbs[0].file_id
                 )
