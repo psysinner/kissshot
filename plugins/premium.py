@@ -216,18 +216,22 @@ async def myplan_handler(_, m: Message):
 # -------------------------------------------------------------------------
 @Client.on_message(filters.command("add_premium") & filters.user(ADMINS))
 async def give_premium_cmd_handler(client, message):
-    if len(message.command) == 4:
+    if len(message.command) >= 3:
         time_zone = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
         current_time = time_zone.strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p") 
-        user_id = int(message.command[1])  
+        try:
+            user_id = int(message.command[1])
+        except ValueError:
+            return await message.reply_text("❌ Invalid User ID. Must be a number.")
+
         try:
             user = await client.get_users(user_id)
         except:
             await message.reply_text("Invalid user ID")
             return
         
-        # Renamed variable from 'time' to 'duration' to avoid conflict with import time
-        duration = message.command[2] + " " + message.command[3]
+        # Join all remaining parts to form the duration string
+        duration = " ".join(message.command[2:])
         seconds = await get_seconds(duration)
         
         if seconds > 0:

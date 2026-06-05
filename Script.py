@@ -136,3 +136,9 @@ class script(object):
 📆 𝖣𝖺𝗍𝖾:- <code>{} </code>
 
 #verified_{}_completed"""
+
+    PREMIUM_REFERRAL_LOG = """💎 **Premium Referral Reward**
+
+👤 **Inviter:** {inviter} [<code>{inviter_id}</code>]
+👤 **New User:** {user} [<code>{user_id}</code>]
+🎁 **Reward:** 1 Hour Premium Subscription Granted!"""

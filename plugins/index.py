@@ -82,7 +82,9 @@ async def send_for_index(bot, message):
         
     i = await message.reply("Forward last message from channel OR send last message link.")
     try:
-        msg = await bot.listen(chat_id=message.chat.id, user_id=message.from_user.id)
+        msg = await bot.listen(chat_id=message.chat.id, user_id=message.from_user.id, timeout=60)
+    except asyncio.TimeoutError:
+        return await message.reply("⏰ Timeout! Indexing cancelled.")
     except Exception as e:
         return await message.reply(f"Listener Error: {e}")
     await i.delete()
@@ -118,8 +120,11 @@ async def send_for_index(bot, message):
 
     s = await message.reply("Send skip message number (e.g., 0).")
     try:
-        msg = await bot.listen(chat_id=message.chat.id, user_id=message.from_user.id)
+        msg = await bot.listen(chat_id=message.chat.id, user_id=message.from_user.id, timeout=60)
         skip = int(msg.text)
+    except asyncio.TimeoutError:
+        await s.delete()
+        return await message.reply("⏰ Timeout! Indexing cancelled.")
     except:
         await s.delete()
         return await message.reply("❌ Invalid Number.")
@@ -236,7 +241,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip, target_db):
                 current += BATCH_SIZE
                 
                 # Live Update
-                percentage = (min(current, lst_msg_id) / lst_msg_id) * 100
+                percentage = (min(current, lst_msg_id) / lst_msg_id) * 100 if lst_msg_id > 0 else 0
                 prog_bar = get_progress_bar(percentage)
                 elapsed_time = get_readable_time(time.time() - start_time)
                 

@@ -85,7 +85,7 @@ class Database:
         user = await self.refer_collection.find_one({"user_id": int(user_id)})
         return user.get("points", 0) if user else 0
 
-    async def add_refer_points(self, user_id: int, points: int):
+    async def set_refer_points(self, user_id: int, points: int):
         # Yeh points ko seedha SET kar dega (replace)
         await self.refer_collection.update_one(
             {"user_id": int(user_id)}, 

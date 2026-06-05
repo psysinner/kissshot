@@ -21,13 +21,9 @@ async def get_stats(bot, message: Message):
     blocked = await db.total_blocked_count()
     redeem = await db.total_redeem_count()
     dbsize = await db.get_db_size()
-    freespace = 536870912 - dbsize 
-    try:
-        db_size_human = get_size(dbsize)
-        free_space_human = get_size(freespace)
-    except:
-        db_size_human = await get_size(dbsize)
-        free_space_human = await get_size(freespace)
+    freespace = max(0, 536870912 - dbsize)
+    db_size_human = get_size(dbsize)
+    free_space_human = get_size(freespace)
     try:
         await aVBOTz.edit(script.STATS_TXT.format(
             total_users=total_users,

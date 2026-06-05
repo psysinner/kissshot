@@ -126,7 +126,12 @@ async def generate_thumbnail(video_path):
         thumb_path
     ]
 
-    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    process = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL
+    )
+    await process.wait()
     return thumb_path if os.path.exists(thumb_path) else None
 
 def generate_weird_name(length=8):
