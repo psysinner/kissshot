@@ -94,14 +94,19 @@ async def send_for_index(bot, message):
     
     if msg.text and msg.text.startswith("https://t.me"):
         try:
-            parts = msg.text.split("/")
+            # Handle links like https://t.me/channel/100?single
+            clean_link = msg.text.split("?")[0]
+            parts = clean_link.split("/")
             last_msg_id = int(parts[-1])
+
             chat_id_str = parts[-2]
+
             if chat_id_str.isdigit():
                 chat_id = int(f"-100{chat_id_str}")
             else:
                 chat_id = chat_id_str
-        except:
+        except Exception as e:
+            print(f"Link Parse Error: {e}")
             await message.reply('❌ Invalid message link!')
             return
     elif msg.forward_from_chat and msg.forward_from_chat.type == enums.ChatType.CHANNEL:
@@ -208,7 +213,11 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip, target_db):
                             no_media += 1
                             continue
                         
-                        if message.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT]:
+                        if message.media not in [
+                            enums.MessageMediaType.VIDEO,
+                            enums.MessageMediaType.DOCUMENT,
+                            enums.MessageMediaType.ANIMATION
+                        ]:
                             unsupported += 1
                             continue
                         
@@ -217,6 +226,12 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip, target_db):
                             unsupported += 1
                             continue
                         
+                        # If it's a document, ensure it's a video type
+                        if message.media == enums.MessageMediaType.DOCUMENT:
+                            if not media.mime_type or not media.mime_type.startswith("video/"):
+                                unsupported += 1
+                                continue
+
                         file_id = media.file_id
                         file_unique_id = media.file_unique_id
                         

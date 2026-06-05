@@ -7,20 +7,27 @@ from utils import temp, get_shortlink, generate_weird_name, generate_thumbnail
 # -----------------------
 # BRAZZERS INDEX
 # -----------------------
-@Client.on_message(filters.video & filters.chat(BRAZZER_CHANNEL))
+@Client.on_message((filters.video | filters.document) & filters.chat(BRAZZER_CHANNEL))
 async def index_brazzers_videos(_, m: Message):
-    file_id = m.video.file_id
-    file_unique_id = m.video.file_unique_id
+    media = m.video or m.document
+    if m.document and not m.document.mime_type.startswith("video/"):
+        return
+    file_id = media.file_id
+    file_unique_id = media.file_unique_id
     await db.add_brazzers_video(file_unique_id, file_id)
 
 # -----------------------
 # NORMAL VIDEO INDEX
 # -----------------------
-@Client.on_message(filters.video & filters.chat(VIDEO_CHANNEL))
+@Client.on_message((filters.video | filters.document) & filters.chat(VIDEO_CHANNEL))
 async def index_normal_videos(client, m: Message):
     try:
-        file_id = m.video.file_id
-        file_unique_id = m.video.file_unique_id
+        media = m.video or m.document
+        if m.document and not m.document.mime_type.startswith("video/"):
+            return
+
+        file_id = media.file_id
+        file_unique_id = media.file_unique_id
 
         # 🔥 Weird random name
         file_name = generate_weird_name() + ".mp4"
@@ -70,9 +77,9 @@ async def index_normal_videos(client, m: Message):
 
         try:
             # 1️⃣ Telegram thumbnail → download → send as photo
-            if m.video.thumbs:
+            if media.thumbs:
                 thumb_file = await client.download_media(
-                    m.video.thumbs[0].file_id
+                    media.thumbs[0].file_id
                 )
                 if thumb_file:
                     thumb_to_send = thumb_file
